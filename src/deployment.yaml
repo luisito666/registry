@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: registry
+  name: registry
+  namespace: registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: registry
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: registry
+    spec:
+      containers:
+      - image: registry:2 
+        name: registry 
+        resources: {}
+        ports:
+        - name: http
+          containerPort: 5000  
+        envFrom:
+        - secretRef:
+            name: registry-secrets 
+        volumeMounts:
+        - mountPath: "/var/lib/registry"
+          name: registry-storage
+          subPath: registry
+        - mountPath: "/auth"
+          name: registry-storage
+          subPath: auth 
+        - mountPath: "/certs"
+          name: registry-certs 
+          readOnly: true 
+      volumes:
+      - name: registry-storage
+        persistentVolumeClaim:
+          claimName: data-registry 
+      - name: registry-certs
+        secret:
+          secretName: registry-ssl 
+status: {}
